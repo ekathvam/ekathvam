@@ -1,0 +1,21 @@
+# Go build outputs
+/bin/
+/dist/
+*.exe
+*.out
+*.test
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
