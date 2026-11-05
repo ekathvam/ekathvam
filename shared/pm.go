@@ -3,22 +3,16 @@ package globalshared
 import (
 	"fmt"
 	"os/exec"
-
 )
 
-func Get_pm () string {
-	fmt.Println("Analysing the pacakage manager.")
-	for _, pm := range []string{"apt","dnf","pacman","zypper","apk","pkg","yum"} {
-		if _, err := exec.LookPath(pm); err == nil {
-			return pm
-		}
-	}
-	return "unknown"
-}
 
-
-func Install_pkg(pm string, pkg_name string) error {
+func Install_pkg(pkg_name string) error {
 	var cmd *exec.Cmd
+
+	pm := get_pm()
+	if pm == "unknown" {
+		return fmt.Errorf("failed to identify the package manager.")
+	}
 
 	switch pm {
 	case "apt":
@@ -58,3 +52,15 @@ func Install_pkg(pm string, pkg_name string) error {
 	fmt.Printf("Successfully processed %s via %s\n", pkg_name, pm)
 	return nil
 }
+
+func get_pm () string {
+	fmt.Println("Analysing the pacakage manager.")
+	for _, pm := range []string{"apt","dnf","pacman","zypper","apk","pkg","yum"} {
+		if _, err := exec.LookPath(pm); err == nil {
+			return pm
+		}
+	}
+	return "unknown"
+}
+
+
