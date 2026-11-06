@@ -2,11 +2,37 @@ package globalshared
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"net/url"
+	"net/http"
+	"io"
+	"path"
+	"path/filepath"
+	"strings"
+	"errors"
 )
 
+/*	Download Types
+	1. Linux Packages
+	2. URL
+*/
 
-func Install_pkg(pkg_name string) error {
+func Install_pkg(pkg string) error {
+	
+	pkg_type := pkgtypeparser(pkg)
+	if pkg_type == "1" {
+		err := linux_pkg(pkg)
+		return err
+	} else {
+		err := url_pkg(pkg)
+		return err
+	}
+
+}
+
+func linux_pkg(pkg_name string) error {
+
 	var cmd *exec.Cmd
 
 	pm := get_pm()
@@ -51,6 +77,7 @@ func Install_pkg(pkg_name string) error {
 
 	fmt.Printf("Successfully processed %s via %s\n", pkg_name, pm)
 	return nil
+
 }
 
 func get_pm () string {
@@ -63,4 +90,71 @@ func get_pm () string {
 	return "unknown"
 }
 
+ func url_pkg(fileURL string) error {
+	// 1. Parse the URL string to cleanly extract its path component
+	parsedURL, err := url.Parse(fileURL)
+	if err != nil {
+		return fmt.Errorf("invalid URL structure: %w", err)
+	}
 
+	// 2. Extract the absolute last part of the path string
+	fileName := path.Base(parsedURL.Path)
+	if fileName == "" || fileName == "." || fileName == "/" {
+		return errors.New("the URL string does not terminate with a valid file name segment")
+	}
+
+	// 3. Define the mandatory target directory and join with the filename
+	targetDir := "/ekathvam/downloads"
+	finalSavePath := filepath.Join(targetDir, fileName)
+
+	// 4. Ensure the parent directory structure exists with correct permissions
+	err = os.MkdirAll(targetDir, 0700)
+	if err != nil {
+		return fmt.Errorf("failed to create directory structure: %w", err)
+	}
+
+	// 5. Send the HTTP GET request
+	resp, err := http.Get(fileURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad server status: %s", resp.Status)
+	}
+
+	// 6. Create the local file at the absolute target path
+	out, err := os.Create(finalSavePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// 7. Stream the download straight to disk
+	fmt.Printf("Downloading and auto-saving to: %s\n", finalSavePath)
+	_, err = io.Copy(out, resp.Body)
+	return err
+ }
+
+
+func pkgtypeparser(input string) string {
+	// Clean up whitespace
+	input = strings.TrimSpace(input)
+
+	// Attempt to parse the string as a URL
+	u, err := url.Parse(input)
+	
+	// If it fails basic parsing, it's definitely just a string
+	if err != nil {
+		return "1"
+	}
+
+	// Crucial Check: A valid web URL MUST have a scheme (http/https) and a host.
+	// Without this, plain text like "my-file.txt" or "hello" gets misidentified as a URL path.
+	if (u.Scheme == "http" || u.Scheme == "https") && u.Host != "" {
+		return "2"
+	}
+
+	return "1"
+}

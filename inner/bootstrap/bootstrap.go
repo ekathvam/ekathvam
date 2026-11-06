@@ -1,42 +1,23 @@
 package innerbootstrap
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
+	"os/exec"
+	"ekathvam/shared"
 )
-
-type OSInfo struct {
-	Name       string
-	ID         string
-	VersionID  string
-	Version    string
-	Codename   string
-	PrettyName string
-}
 
 func Bootstrap() {
 	fmt.Println("Identifying running environment")
-	info, err := ParseOSRelease("/etc/os-release")
+	distro, err := globalshared.OS_identify("/etc/os-release")
 	if err != nil {
 		fmt.Println("OS identification failed:", err)
 		os.Exit(1)
 	}
-
-	fmt.Println("Container System Details")
-	fmt.Println("------------------------")
-	fmt.Println("Name:", info.Name)
-	fmt.Println("ID:", info.ID)
-	fmt.Println("Version ID:", info.VersionID)
-	fmt.Println("Version:", info.Version)
-	fmt.Println("Codename:", info.Codename)
-	fmt.Println("Pretty Name:", info.PrettyName)
-
-	if info.ID == "debian" {
+	if distro == "debian" {
 		fmt.Println("\nDebian detected successfully.")
 	} else {
-		fmt.Println("\nUnsupported Container or running outside the container:", info.ID)
+		fmt.Println("\nUnsupported Container or running outside the container:", distro)
 		os.Exit(1)
 	}
 
@@ -47,6 +28,18 @@ func Bootstrap() {
 		fmt.Println("OOPS! Bootstrap running as a regular user.\nExiting....")
 		os.Exit(1)
 	}
+	
+	fmt.Println("Installing necessary packages inside the container!...")
+	globalshared.Install_pkg("ufw")
+
+	update := exec.Command("apt", "update", "&&", "apt", "upgrade", "-y")
+	globalshared.Cmd_run("Updating the container environment!", update)
+
+	ufw := exec.Command("ufw", "enable")
+	globalshared.Cmd_run("Enabling the UFW", ufw)
+
+
+
 
 	var option string
 	fmt.Println("\nWelcome to Ekathvam Inner Bootstrap!")
@@ -57,71 +50,62 @@ func Bootstrap() {
 
 		switch option {
 		case "1":
-			fmt.Println("Initiating Administrator Bootstrap...")
+			fmt.Println("Downloading Administrator Server Bootstrap....")
+			err = globalshared.Install_pkg("https://raw.githubusercontent.com/ekathvam/ekathvam/main/bin/administrator_bootstrap")
+			if err != nil {
+				fmt.Println("Error: ", err)
+				os.Exit(1)
+			}
+
+			cmd := exec.Command("/ekathvam/downloads/administrator_bootstrap")
+			globalshared.Cmd_run("Executing Administrator Server Bootstrap...", cmd)
+
 			os.Exit(0)
+
 		case "2":
-			fmt.Println("Initiating Client Bootstrap...")
+			fmt.Println("Downloading Client Server Bootstrap....")
+			err = globalshared.Install_pkg("https://raw.githubusercontent.com/ekathvam/ekathvam/main/bin/client_bootstrap")
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
+
+			cmd := exec.Command("/ekathvam/downloads/client_bootstrap")
+			globalshared.Cmd_run("Executing Client Server Bootstrap...", cmd)
+
 			os.Exit(0)
+
 		case "3":
-			fmt.Println("Initiating Web Server Bootstrap...")
+			fmt.Println("Downloading Web Server Bootstrap....")
+			err = globalshared.Install_pkg("https://raw.githubusercontent.com/ekathvam/ekathvam/main/bin/web_bootstrap")
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
+
+			cmd := exec.Command("/ekathvam/downloads/web_bootstrap")
+			globalshared.Cmd_run("Executing Web Server Bootstrap...", cmd)
+
 			os.Exit(0)
+
 		case "4":
-			fmt.Println("Initiating DNS Bootstrap...")
+			fmt.Println("Downloading DNS Bootstrap....")
+			err = globalshared.Install_pkg("https://raw.githubusercontent.com/ekathvam/ekathvam/main/bin/dns_bootstrap")
+			if err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
+
+			cmd := exec.Command("/ekathvam/downloads/dns_bootstrap")
+			globalshared.Cmd_run("Executing DNS Bootstrap...", cmd)
+
 			os.Exit(0)
+
 		default:
 			fmt.Println("❌ Invalid selection. Please choose a valid option.")
 		}
 	}
 }
 
-
-func ParseOSRelease(path string) (OSInfo, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return OSInfo{}, fmt.Errorf("failed to open %s: %w", path, err)
-	}
-	defer file.Close()
-
-	values := make(map[string]string)
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-
-		// Ignore blank lines and comments.
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		key, value, found := strings.Cut(line, "=")
-		if !found {
-			continue
-		}
-
-		key = strings.TrimSpace(key)
-		value = strings.TrimSpace(value)
-
-		// Remove surrounding quotes.
-		value = strings.Trim(value, `"'`)
-
-		values[key] = value
-	}
-
-	if err := scanner.Err(); err != nil {
-		return OSInfo{}, fmt.Errorf("failed to read %s: %w", path, err)
-	}
-
-	info := OSInfo{
-		Name:       values["NAME"],
-		ID:         values["ID"],
-		VersionID:  values["VERSION_ID"],
-		Version:    values["VERSION"],
-		Codename:   values["VERSION_CODENAME"],
-		PrettyName: values["PRETTY_NAME"],
-	}
-
-	return info, nil
-}
 
 
