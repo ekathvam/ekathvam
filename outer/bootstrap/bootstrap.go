@@ -37,9 +37,16 @@ fmt.Println("Verifying Superuser Privileage...")
 	)
 	globalshared.Cmd_run("Creating Container", cmd1)
 
+
 	// 2. Enable lxc-net Service
 	cmd2 := exec.Command("systemctl", "enable", "--now", "lxc-net")
 	globalshared.Cmd_run("Enabling lxc-net service", cmd2)
+
+	globalshared.Content_writer("/ekathvam/downloads/bootstrap/default-configs/lxc-net", "/etc/default/lxc-net", "FILE_OVERWRITE_ROOT")
+	globalshared.Content_writer("/ekathvam/downloads/bootstrap/default-configs/container-config", "/ekathvam/containers/ekathvam/config", "FILE_OVERWRITE_ROOT")
+
+	restart := exec.Command("systemctl", "restart", "lxc-net", "&&", "sysctl", "--system")
+	globalshared.Cmd_run("Restarting lxc-net..", restart)
 
 	// 3. Start the Container
 	cmd3 := exec.Command("lxc-start", "-n", "ekathvam", "-P", "/ekathvam/containers")

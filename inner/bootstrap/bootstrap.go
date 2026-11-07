@@ -28,12 +28,19 @@ func Bootstrap() {
 		fmt.Println("OOPS! Bootstrap running as a regular user.\nExiting....")
 		os.Exit(1)
 	}
-	
-	fmt.Println("Installing necessary packages inside the container!...")
-	globalshared.Install_pkg("ufw")
+
+	globalshared.Content_writer("default-configs/20-eth0.network", "/etc/systemd/network/20-eth0.network", "FILE_OVERWRITE_ROOT")
+	globalshared.Content_writer("default-configs/resolv.conf", "/etc/resolv.conf", "FILE_OVERWRITE_ROOT")
+
+	restart := exec.Command("systemctl", "restart", "systemd-networkd")
+	globalshared.Cmd_run("Restarting network services..", restart)
 
 	update := exec.Command("apt", "update", "&&", "apt", "upgrade", "-y")
 	globalshared.Cmd_run("Updating the container environment!", update)
+
+	
+	fmt.Println("Installing necessary packages inside the container!...")
+	globalshared.Install_pkg("ufw")
 
 	ufw := exec.Command("ufw", "enable")
 	globalshared.Cmd_run("Enabling the UFW", ufw)
