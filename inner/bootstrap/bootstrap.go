@@ -29,11 +29,6 @@ func Bootstrap() {
 		os.Exit(1)
 	}
 
-	globalshared.Content_writer("default-configs/20-eth0.network", "/etc/systemd/network/20-eth0.network", "FILE_OVERWRITE_ROOT")
-	globalshared.Content_writer("default-configs/resolv.conf", "/etc/resolv.conf", "FILE_OVERWRITE_ROOT")
-
-	restart := exec.Command("systemctl", "restart", "systemd-networkd")
-	globalshared.Cmd_run("Restarting network services..", restart)
 
 	update := exec.Command("apt", "update", "&&", "apt", "upgrade", "-y")
 	globalshared.Cmd_run("Updating the container environment!", update)
