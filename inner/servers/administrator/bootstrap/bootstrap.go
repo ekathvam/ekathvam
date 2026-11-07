@@ -19,16 +19,6 @@ func Adminbootstrap() {
 		fmt.Println("OOPS! Bootstrap running as a regular user.\nExiting....")
 		os.Exit(1)
 	}
-	
-	pkg := []string{"pdns-server", "pdns-backend-sqlite3", "sqlite3"}
-	for _, pkg := range pkg {
-		err := globalshared.Install_pkg(pkg)
-		if err != nil {
-			fmt.Println("Error: ", err)
-			os.Exit(1)
-		}
-	}
-
 
 	
 	cmd3 := exec.Command("ufw", "delete", "allow", "2008/tcp",
