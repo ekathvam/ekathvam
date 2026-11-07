@@ -21,11 +21,10 @@ func Adminbootstrap() {
 	}
 
 	
-	cmd3 := exec.Command("ufw", "delete", "allow", "2008/tcp",
-		"&&", "ufw", "allow", "from", "192.168.1.0/24", "to", "any", "port", "2008", "proto", "tcp",
-		"&&", "ufw", "reload",
+	cmd3 := exec.Command("bash", "-c", 
+	    "ufw delete allow 2008/tcp && ufw allow from 192.168.1.0/24 to any port 2008 proto tcp && ufw reload",
 	)
-	globalshared.Cmd_run("Unlocking firwalls", cmd3)
+	globalshared.Cmd_run("Unlocking firewalls", cmd3)
 	
 
 

@@ -30,14 +30,40 @@ func Bootstrap() {
 	}
 
 
-	update := exec.Command("apt", "update", "&&", "apt", "upgrade", "-y")
-	globalshared.Cmd_run("Updating the container environment!", update)
+	pathLine := "\nexport PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"\n"
+
+	// Define the file path (e.g., the root user's .bashrc)
+	filePath := "/root/.bashrc"
+
+	// Open the file with Append, Write-Only, and Create permissions if it doesn't exist
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		return
+	}
+	defer file.Close()
+
+	// Write the string to the file
+	_, err = file.WriteString(pathLine)
+	if err != nil {
+		fmt.Printf("Error writing to file: %v\n", err)
+		return
+	}
+
+	fmt.Println("Successfully appended the system path to .bashrc!")
+
+	update := exec.Command("apt", "update")
+	globalshared.Cmd_run("Updating package index", update)
+
+	upgrade := exec.Command("apt", "upgrade", "-y")
+	globalshared.Cmd_run("Upgrading container packages", upgrade)
+	
 
 	
 	fmt.Println("Installing necessary packages inside the container!...")
 	globalshared.Install_pkg("ufw")
 
-	ufw := exec.Command("ufw", "enable")
+	ufw := exec.Command("/usr/sbin/ufw", "enable")
 	globalshared.Cmd_run("Enabling the UFW", ufw)
 
 
@@ -58,6 +84,10 @@ func Bootstrap() {
 				fmt.Println("Error: ", err)
 				os.Exit(1)
 			}
+
+			chmod := exec.Command("chmod", "+x", "/ekathvam/downloads/administrator_bootstrap")
+			globalshared.Cmd_run("Making Administrator bootstrap executable", chmod)
+
 
 			cmd := exec.Command("/ekathvam/downloads/administrator_bootstrap")
 			cmd.Stdin = os.Stdin
@@ -81,6 +111,9 @@ func Bootstrap() {
 				os.Exit(1)
 			}
 
+			chmod := exec.Command("chmod", "+x", "/ekathvam/downloads/client_bootstrap")
+			globalshared.Cmd_run("Making client bootstrap executable...", chmod)
+
 			cmd := exec.Command("/ekathvam/downloads/client_bootstrap")
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
@@ -103,6 +136,10 @@ func Bootstrap() {
 				os.Exit(1)
 			}
 
+			chmod := exec.Command("chmod", "+x", "/ekathvam/downloads/web_bootstrap")
+			globalshared.Cmd_run("/ekathvam/downloads/web_bootstrap", chmod)
+
+
 			cmd := exec.Command("/ekathvam/downloads/web_bootstrap")
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
@@ -124,6 +161,10 @@ func Bootstrap() {
 				fmt.Println("Error:", err)
 				os.Exit(1)
 			}
+
+			chmod := exec.Command("chmod", "+x", "/ekathvam/downloads/dns_bootstrap")
+			globalshared.Cmd_run("/ekathvam/downloads/dns_bootstrap", chmod)
+
 
 			cmd := exec.Command("/ekathvam/downloads/dns_bootstrap")
 			cmd.Stdin = os.Stdin

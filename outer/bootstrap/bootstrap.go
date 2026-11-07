@@ -110,8 +110,7 @@ fmt.Println("Verifying Superuser Privileage...")
 	    "--",
 	    "/bin/bash",
 	    "-c",
-	    "chmod +x /ekathvam/downloads/inner_bootstrap && exec /ekathvam/downloads/inner_bootstrap",
-	)
+	    "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; chmod +x /ekathvam/downloads/inner_bootstrap && exec /ekathvam/downloads/inner_bootstrap",	)
 	
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
