@@ -119,11 +119,11 @@ fmt.Println("Verifying Superuser Privileage...")
 	err = cmd.Run()
 	
 	if err != nil {
-	    fmt.Fprintf(os.Stderr, "Inner bootstrap failed: %v\n", err)
+	    fmt.Fprintf(os.Stderr, "Inner bootstrap failed to launch: %v\n", err)
 	    os.Exit(1)
 	}
 	
-	fmt.Println("\n[Host] Inner bootstrap completed.")
+	fmt.Println("\n[Host] Outer bootstrap completed.")
 
 }
 

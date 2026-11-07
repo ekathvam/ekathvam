@@ -16,7 +16,6 @@ import (
 
 func Webbootstrap() {
 	fmt.Println("Initializing Web Server Bootstrap..")
-	fmt.Println("Installing NGINX")
 	fmt.Println("Verifying Superuser Privileage...")
 	if os.Geteuid() == 0 {
 		fmt.Println("Running with root privileges!")

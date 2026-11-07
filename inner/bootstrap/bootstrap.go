@@ -58,9 +58,18 @@ func Bootstrap() {
 			}
 
 			cmd := exec.Command("/ekathvam/downloads/administrator_bootstrap")
-			globalshared.Cmd_run("Executing Administrator Server Bootstrap...", cmd)
-
-			os.Exit(0)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+				
+			err = cmd.Run()
+			
+			if err != nil {
+			    fmt.Fprintf(os.Stderr, "Administrator bootstrap failed to launch: %v\n", err)
+			    os.Exit(1)
+			}
+			
+			fmt.Println("\n[Host] Inner bootstrap completed.")
 
 		case "2":
 			fmt.Println("Downloading Client Server Bootstrap....")
@@ -71,9 +80,18 @@ func Bootstrap() {
 			}
 
 			cmd := exec.Command("/ekathvam/downloads/client_bootstrap")
-			globalshared.Cmd_run("Executing Client Server Bootstrap...", cmd)
-
-			os.Exit(0)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+				
+			err = cmd.Run()
+			
+			if err != nil {
+			    fmt.Fprintf(os.Stderr, "Client bootstrap failed to launch: %v\n", err)
+			    os.Exit(1)
+			}
+			
+			fmt.Println("\n[Host] Inner bootstrap completed.")
 
 		case "3":
 			fmt.Println("Downloading Web Server Bootstrap....")
@@ -84,9 +102,18 @@ func Bootstrap() {
 			}
 
 			cmd := exec.Command("/ekathvam/downloads/web_bootstrap")
-			globalshared.Cmd_run("Executing Web Server Bootstrap...", cmd)
-
-			os.Exit(0)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+				
+			err = cmd.Run()
+			
+			if err != nil {
+			    fmt.Fprintf(os.Stderr, "Web bootstrap failed to launch: %v\n", err)
+			    os.Exit(1)
+			}
+			
+			fmt.Println("\n[Host] Inner bootstrap completed.")
 
 		case "4":
 			fmt.Println("Downloading DNS Bootstrap....")
@@ -97,9 +124,18 @@ func Bootstrap() {
 			}
 
 			cmd := exec.Command("/ekathvam/downloads/dns_bootstrap")
-			globalshared.Cmd_run("Executing DNS Bootstrap...", cmd)
-
-			os.Exit(0)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+				
+			err = cmd.Run()
+			
+			if err != nil {
+			    fmt.Fprintf(os.Stderr, "DNS bootstrap failed to launch: %v\n", err)
+			    os.Exit(1)
+			}
+			
+			fmt.Println("\n[Host] Inner bootstrap completed.")
 
 		default:
 			fmt.Println("❌ Invalid selection. Please choose a valid option.")

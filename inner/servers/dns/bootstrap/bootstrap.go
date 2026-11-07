@@ -32,7 +32,7 @@ func Dnsbootstrap() {
 
 
 	
-	cmd3 := exec.Command("ufw", "delete", "allow", "53/tcp",
+	cmd3 := exec.Command("ufw", "delete", "allow", "53/tcp", "ufw", "delete", "allow", "2008/tcp",
 		"&&", "ufw", "allow", "from", "192.168.1.0/24", "to", "any", "port", "53", "proto", "tcp",
 		"&&", "ufw", "allow", "from", "192.168.1.0/24", "to", "any", "port", "2008", "proto", "tcp",
 		"&&", "ufw", "reload",
